@@ -176,13 +176,13 @@
                 //둘 중 한명이 죽을때까지 전투 반복
                 while (!player.isDead && !monster.isDead)
                 {
-                    Console.WriteLine($"{player.name}의 턴!");
+                    Console.WriteLine($"{player.name}의 공격!");
                     monster.HitAttack(player.attack);
                     Thread.Sleep(1000);
 
                     if (monster.isDead) break;
 
-                    Console.WriteLine($"{monster.name}의 턴!");
+                    Console.WriteLine($"{monster.name}의 공격!");
                     player.HitAttack(monster.attack);
                     Thread.Sleep(1000);
                 }
