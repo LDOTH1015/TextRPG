@@ -4,233 +4,114 @@
     {
         static void Main(string[] args)
         {
-            Goblin goblin = new Goblin("Goblin"); // 고블린 생성
-            Dragon dragon = new Dragon("Dragon"); // 드래곤 생성
+            Warrior player = new Warrior();
 
             //플레이어의 이름을 받아 플레이어 생성
-            Console.WriteLine("플레이어 이름을 입력해주세요.");
-            string playerName = Console.ReadLine();
-            Warrior player = new Warrior(playerName);
-
-            // 보상 아이템
-            List<IItem> treasure = new List<IItem> { new HealthPotion(), new StrengthPotion() };
-
-            // 스테이지 1
-            Stage stage1 = new Stage(player, goblin, treasure);
-            stage1.Start();
-
-            // 플레이어 사망 확인
-            if (player.isDead) return;
-
-            // 스테이지 2
-            Stage stage2 = new Stage(player, dragon, treasure);
-            stage2.Start();
-
-            // 플레이어 사망 확인
-            if (player.isDead) return;
-
-            // 게임 클리어
-            Console.WriteLine("Game Clear");
-            Console.WriteLine("축하합니다, {0}님", playerName);
+            Console.WriteLine("스파르타 마을에 오신 여러분 환영합니다. ");
+            Console.WriteLine("이곳에서 던전으로 들어가기전 활동을 할 수 있습니다.");
+            Console.WriteLine("");
+            Console.WriteLine("1. 상태 보기");
+            Console.WriteLine("2. 인벤토리");
+            Console.WriteLine("3. 상점");
+            Console.WriteLine("");
+            Console.WriteLine("원하시는 행동을 입력해주세요.");
+            String act = Console.ReadLine();
+            while (true)
+            {
+                switch (int.Parse(act))
+                {
+                    case 1: player.showStatus(); break;
+                    case 2: break;
+                    case 3: break;
+                    default: Console.WriteLine("잘못된 입력입니다."); break;
+                }
+            }
         }
 
-        //캐릭터 인터페이스
-        public interface ICharacter
+        public interface Item
         {
-            public string name { get; }
-            public int health { get; set; }
-            public int attack { get; set; }
-            public bool isDead { get; }
-            //피격 메소드
-            public void HitAttack(int damage);
+            public string Name { get; }
+            public String effect { get; }
+            public string Description { get; }
         }
+        
 
         //전사 클래스
-        public class Warrior : ICharacter
+        public class Warrior
         {
-            public string name { get; }
-            public int health { get; set; }
-            public int attack { get; set; }
+            public int level = 1;
+            public string name = "User";
+            public int attack = 10;
+            public int def = 5;
+            public int health = 100;
+            public int Gold = 1500;
             public bool isDead => health <= 0;
 
-            public Warrior(string name)
+            public Warrior()
             {
-                this.name = name;
-                health = 100;
-                attack = 20;
+
             }
-            public void HitAttack(int damage)
+            public void showStatus()
             {
-                health -= damage;
-                if (isDead)
+                Console.WriteLine("상태 보기");
+                Console.WriteLine("캐릭터의 정보가 표시됩니다.");
+                Console.WriteLine("");
+                if(level > 10)
                 {
-                    Console.WriteLine("You die");
+                    Console.WriteLine("Lv. {0}", level);
+                } else
+                {
+                    Console.WriteLine("Lv. 0{0}",level);
                 }
-                else
+                Console.WriteLine("{0}", name);
+                Console.WriteLine("공격력 : {0}", attack);
+                Console.WriteLine("방어력 : {0}", def);
+                Console.WriteLine("체 력 : {0}", health);
+                Console.WriteLine("Gold : {0} G", Gold);
+                Console.WriteLine("");
+                Console.WriteLine("0. 나가기");
+                Console.WriteLine("");
+                Console.WriteLine("원하시는 행동을 입력해주세요.");
+                String act = Console.ReadLine();
+                while (true)
                 {
-                    Console.WriteLine("{0}는 {1}만큼 데미지를 입었습니다. 남은 체력 : {2}", name, damage, health);
-                }
-            }
-        }
-
-        //몬스터 클래스
-        public class Monster : ICharacter
-        {
-            public string name { get; }
-            public int health { get; set; }
-            public int attack { get; set; }
-            public bool isDead => health <= 0;
-
-            public Monster(string name, int health, int attack)
-            {
-                this.name = name;
-                this.health = health;
-                this.attack = attack;
-            }
-
-            public void HitAttack(int damage)
-            {
-                health -= damage;
-                if (isDead)
-                {
-                    Console.WriteLine("{0} die", name);
-                }
-                else
-                {
-                    Console.WriteLine("{0}는 {1}만큼 데미지를 입었습니다. 남은 체력 : {2}", name, damage, health);
-                }
-            }
-        }
-
-        //고블린 클래스
-        public class Goblin : Monster
-        {
-            public Goblin(string name) : base(name, 50, 5) { }
-        }
-
-        //드래곤 클래스
-        public class Dragon : Monster
-        {
-            public Dragon(string name) : base(name, 150, 20) { }
-        }
-
-        // 아이템 인터페이스
-        public interface IItem
-        {
-            string name { get; }
-            void Use(Warrior warrior);
-        }
-
-        // 체력 포션
-        public class HealthPotion : IItem
-        {
-            public string name => "체력 포션";
-
-            public void Use(Warrior warrior)
-            {
-                Console.WriteLine("체력 포션을 사용합니다. 체력이 50 회복합니다.");
-                warrior.health += 50;
-                if (warrior.health > 100) warrior.health = 100;
-            }
-        }
-
-        // 힘 포션
-        public class StrengthPotion : IItem
-        {
-            public string name => "힘 포션";
-
-            public void Use(Warrior warrior)
-            {
-                Console.WriteLine("공격력이 10 증가합니다.");
-                warrior.attack += 10;
-            }
-        }
-
-        //스테이지
-        public class Stage
-        {
-            private ICharacter player;
-            private ICharacter monster;
-            private List<IItem> treasure;
-
-            public delegate void GameEvent(ICharacter character);
-            public event GameEvent CharactorDead;
-
-            //스테이지 설정
-            public Stage(ICharacter player, ICharacter monster, List<IItem> treasure)
-            {
-                this.player = player;
-                this.monster = monster;
-                this.treasure = treasure;
-                CharactorDead += Clear;
-            }
-
-            //스테이지 시작시
-            public void Start()
-            {
-                Console.WriteLine("스테이지 시작!");
-                Console.WriteLine($"플레이어 정보: 체력({player.health}), 공격력({player.attack})");
-                Console.WriteLine($"몬스터 정보: 이름({monster.name}), 체력({monster.health}), 공격력({monster.attack})");
-                Console.WriteLine("----------------------------------------------------");
-
-                //둘 중 한명이 죽을때까지 전투 반복
-                while (!player.isDead && !monster.isDead)
-                {
-                    Console.WriteLine($"{player.name}의 공격!");
-                    monster.HitAttack(player.attack);
-                    Thread.Sleep(1000);
-
-                    if (monster.isDead) break;
-
-                    Console.WriteLine($"{monster.name}의 공격!");
-                    player.HitAttack(monster.attack);
-                    Thread.Sleep(1000);
-                }
-
-                //유저의 사망 확인
-                if (player.isDead)
-                {
-                    CharactorDead?.Invoke(player);
-                }
-                //몬스터의 사망 확인
-                else if (monster.isDead)
-                {
-                    CharactorDead?.Invoke(monster);
-                }
-            }
-
-            //스테이지 클리어시
-            private void Clear(ICharacter character)
-            {
-                if (character is Monster)
-                {
-                    Console.WriteLine($"스테이지 클리어! {character.name}를 물리쳤습니다!");
-
-                    // 플레이어에게 아이템 보상
-                    if (treasure != null)
+                    switch (int.Parse(act))
                     {
-                        Console.WriteLine("보물 중 하나를 선택하여 사용할 수 있습니다:");
-                        foreach (var item in treasure)
-                        {
-                            Console.WriteLine(item.name);
-                        }
-
-                        Console.WriteLine("사용할 아이템 이름을 입력하세요:");
-                        string input = Console.ReadLine();
-
-                        // 선택된 아이템 사용
-                        IItem selectedItem = treasure.Find(item => item.name == input);
-                        if (selectedItem != null)
-                        {
-                            selectedItem.Use((Warrior)player);
-                        }
+                        case 0:  break;
+                        default: Console.WriteLine("잘못된 입력입니다."); break;
                     }
                 }
-                else
+            }            
+        }
+        public class Inventori
+        {
+            public void showInventori(Warrior player)
+            {
+                Console.WriteLine("인벤토리");
+                Console.WriteLine("보유 중인 아이템을 관리할 수 있습니다.");
+                Console.WriteLine("");
+                Console.WriteLine("[아이템 목록]");
+                Console.WriteLine("");
+                Console.WriteLine("1. 장착 관리");
+                Console.WriteLine("0. 나가기");
+                Console.WriteLine("");
+                Console.WriteLine("원하시는 행동을 입력해주세요.");
+                String act = Console.ReadLine();
+                while (true)
                 {
-                    Console.WriteLine("Game Over");
+                    switch (int.Parse(act))
+                    {
+                        case 0: break;
+                        default: Console.WriteLine("잘못된 입력입니다."); break;
+                    }
                 }
             }
+
+            public Inventori()
+            {
+
+            }
+
         }
     }
 }
